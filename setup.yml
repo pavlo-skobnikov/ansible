@@ -17,40 +17,48 @@
           - lazydocker
           - gnu-sed
           - helix
-    - name: Install UI tools
+    - name: Install basic Homebrew casks
       ansible.builtin.homebrew_cask:
         name:
+          - font-hack-nerd-font
+          - sf-symbols
           - alacritty
           - docker
           - ngrok
           - intellij-idea
           - postman
-          - font-hack-nerd-font
-          - sf-symbols
           - 1password
           - 1password-cli
           - raycast
           - shortcat
           - karabiner-elements
-          - google-chrome
+          - arc
           - telegram
           - slack
           - zoom
     - name: Homebrew-managed languages & their tools
       ansible.builtin.homebrew:
         name:
+          # Markdown.
           - marksman
+          # Shell.
           - bash-language-server
           - shellcheck
           - shfmt
+          # YAML.
           - yaml-language-server
           - yamllint
+          # Ansible.
           - ansible-language-server
           - ansible-lint
+          # Java.
           - jdtls
           - google-java-format
+          # Scala.
           - coursier
+          # Golang.
           - go
+          # Web development.
           - node
           - typescript-language-server
           - vscode-langservers-extracted
@@ -65,12 +73,14 @@
         go install mvdan.cc/gofumpt@latest
         go install github.com/nametake/golangci-lint-langserver@latest
         go install github.com/a-h/templ/cmd/templ@latest
+        go install github.com/lasorda/protobuf-language-server@latest
     - name: Install Node-managed tools
       ansible.builtin.npm:
         global: true
         name:
           - tailwindcss/language-server
           - olrtg/emmet-language-server
+          - vim-language-server
     - name: Check if Rustup is installed
       shell: command -v rustup
       register: rustup_exists
@@ -83,7 +93,6 @@
         rustup component add rust-analyzer
         rustup component add clippy
         rustup component add rustfmt
-
         cargo install taplo-cli --locked
         cargo install --git https://github.com/estin/simple-completion-language-server.git
     - name: Check if SDKMan is installed
