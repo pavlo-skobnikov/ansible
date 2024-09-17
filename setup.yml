@@ -2,34 +2,33 @@
 - name: Setup my computing environment
   hosts: localhost
   tasks:
-    - name: Install basic CLI tools
-      ansible.builtin.homebrew:
+    ### Must-have tools
+    - name: Install CLI tools
+      homebrew:
         name:
-          - zsh
-          - bat
-          - fd
-          - eza
-          - fzf
-          - jq
-          - miller
-          - pandoc
-          - lazygit
-          - lazydocker
-          - gnu-sed
-          - helix
-    - name: Install basic Homebrew casks
-      ansible.builtin.homebrew_cask:
+          - zsh # Ze shell to use
+          - bat # Prettier `cat`
+          - eza # Better `ls`
+          - gnu-sed # GNU implementation of `sed`
+          - fzf # Command-line fuzzy finder
+          - ripgrep # Search tool like `grep` and `The Silver Searcher`
+          - fd # A simple alternative to `find`
+          - jq # JSON processor
+          - miller # Like sed, awk, cut, join & sort for name-indexed data such as CSV
+          - pandoc # Swiss-army knife of markup format conversion
+          - lf # Terminal file manager
+          - lazygit # Simple terminal UI for `git` commands
+          - lazydocker # Simple terminal UI for `docker` commands
+          - helix # Post-modern modal text editor
+      tags: tools-cli
+    - name: Install UI tools
+      homebrew_cask:
         name:
-          - font-hack-nerd-font
-          - sf-symbols
-          - alacritty
           - docker
           - ngrok
+          - alacritty
           - intellij-idea
           - postman
-          - 1password
-          - 1password-cli
-          - logseq
           - raycast
           - shortcat
           - karabiner-elements
@@ -37,73 +36,246 @@
           - telegram
           - slack
           - zoom
-    - name: Homebrew-managed languages & their tools
-      ansible.builtin.homebrew:
+      tags: tools-ui
+    ### Package managers
+    ## Cargo
+    - name: Check if Cargo is installed
+      command: which cargo
+      register: cargo_check
+      ignore_errors: yes
+      tags: package-cargo
+    - name: Exit Cargo installation
+      fail:
+        msg: Cargo is already installed
+      when: cargo_check == 0
+      tags: package-cargo
+    - name: Install Cargo
+      shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+      when: cargo_check != 0
+      tags: package-cargo
+    ## SDKMan
+    - name: Check if SDKMan is installed
+      command: which sdk
+      register: sdkman_check
+      ignore_errors: yes
+      tags: package-sdkman
+    - name: Exit SDKMan installation
+      fail:
+        msg: SDKMan is already installed
+      when: sdkman_check == 0
+      tags: package-sdkman
+    - name: Install SDKman
+      shell: curl -s "https://get.sdkman.io" | bash
+      when: sdkman_check != 0
+      tags: package-sdkman
+    ## Node & NPM
+    - name: Check if Node & NPM are installed
+      command: which npm
+      register: npm_check
+      ignore_errors: yes
+      tags: package-node-npm
+    - name: Exit Node & NPM installation
+      fail:
+        msg: Node & NPM are already installed
+      when: npm_check == 0
+      tags: package-node-npm
+    - name: Install Node & NPM
+      homebrew:
         name:
-          # Markdown.
+          - node
+      when: npm_check != 0
+      tags: package-node-npm
+    ### Languages & tools
+    ## Markdown
+    - name: Add Markdown support -> LS
+      homebrew:
+        name:
           - marksman
-          # Shell.
+      tags: lang-markdown
+    ## Bash, Zsh, etc
+    - name: Add Bash and Zsh support -> LS, linter, and formatter
+      homebrew:
+        name:
           - bash-language-server
           - shellcheck
           - shfmt
-          # YAML.
+      tags: lang-shell
+    ## YAML
+    - name: Add YAML support -> LS & linter
+      homebrew:
+        name:
           - yaml-language-server
           - yamllint
-          # Ansible.
+      tags: lang-yaml
+    ## Ansible
+    - name: Add Ansible support -> LS & linter
+      homebrew:
+        name:
           - ansible-language-server
           - ansible-lint
-          # Java.
+      tags: lang-ansible
+    ## TOML
+    - name: Check if Rustup is installed
+      command: which rustup
+      register: rustup_check
+      ignore_errors: yes
+      tags: lang-toml
+    - name: Exit TOML support installation
+      fail:
+        msg: Please install Rustup
+      when: rustup_check != 0
+      tags: lang-toml
+    - name: Add TOML support -> LS
+      shell: |
+        cargo install taplo-cli --locked
+      tags: lang-toml
+    ## Protobuf
+    - name: Check if Golang is installed
+      command: which go
+      register: go_check
+      ignore_errors: yes
+      tags: lang-protobuf
+    - name: Exit Protobuf support installation
+      fail:
+        msg: Please install Golang
+      when: go_check != 0
+      tags: lang-protobuf
+    - name: Add Protobuf support -> LS
+      shell: |
+        go install github.com/lasorda/protobuf-language-server@latest
+      tags: lang-protobuf
+    ## Java
+    - name: Check if SDKMan is installed
+      command: which sdk
+      register: sdkman_check
+      ignore_errors: yes
+      tags: lang-java
+    - name: Exit Java installation
+      fail:
+        msg: Please install SDKMan
+      when: sdkman_check != 0
+      tags: lang-java
+    - name: Install Java via SDKMan
+      shell: |
+        sdk install java
+      tags: lang-java
+    - name: Add Java support -> LS & formatter
+      homebrew:
+        name:
           - jdtls
           - google-java-format
-          # Scala.
+      tags: lang-java
+    ## Scala
+    - name: Check if SDKMan is installed
+      command: which sdk
+      register: sdkman_check
+      ignore_errors: yes
+      tags: lang-scala
+    - name: Exit Scala installation
+      fail:
+        msg: Please install SDKMan
+      when: sdkman_check != 0
+      tags: lang-scala
+    - name: Install Scala via SDKMan
+      shell: |
+        sdk install scala
+      tags: lang-scala
+    - name: Add Scala support -> Coursier
+      homebrew:
+        name:
           - coursier
-          # Golang.
-          - go
-          # Web development.
-          - node
-          - typescript-language-server
-          - vscode-langservers-extracted
-    - name: Install Coursier-managed tools
-      ansible.builtin.shell: |
+      tags: lang-scala
+    - name: Add Scala support -> Metals & Scalafmt
+      shell: |
         cs install metals
         cs install scalafmt
-    - name: Install Go-managed tools
-      ansible.builtin.shell: |
+      tags: lang-scala
+    ## Golang
+    - name: Install Golang
+      homebrew:
+        name:
+          - go
+      tags: lang-go
+    - name: Add Golang support -> LS, linter, debugger, formatter, & Templ
+      shell: |
         go install golang.org/x/tools/gopls@latest
         go install github.com/go-delve/delve/cmd/dlv@latest
         go install mvdan.cc/gofumpt@latest
         go install github.com/nametake/golangci-lint-langserver@latest
         go install github.com/a-h/templ/cmd/templ@latest
-        go install github.com/lasorda/protobuf-language-server@latest
-    - name: Install Node-managed tools
-      ansible.builtin.npm:
-        global: true
-        name:
-          - tailwindcss/language-server
-          - olrtg/emmet-language-server
-          - vim-language-server
+      tags: lang-go
+    ## Rust
     - name: Check if Rustup is installed
-      shell: command -v rustup
-      register: rustup_exists
+      command: which rustup
+      register: rustup_check
       ignore_errors: yes
-    - name: Install Rustup
-      ansible.builtin.shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-      when: rustup_exists is failed
-    - name: Install Rustup- and Cargo-managed tools
-      ansible.builtin.shell: |
+      tags: lang-rust
+    - name: Exit Rust installation
+      fail:
+        msg: Please install Rustup
+      when: rustup_check != 0
+      tags: lang-rust
+    - name: Add Rust support -> LS, linter, & formatter
+      shell: |
         rustup component add rust-analyzer
         rustup component add clippy
         rustup component add rustfmt
         cargo install taplo-cli --locked
         cargo install --git https://github.com/estin/simple-completion-language-server.git
-    - name: Check if SDKMan is installed
-      shell: command -v sdk
-      register: sdkman_exists
+      tags: lang-rust
+    ## Web development
+    - name: Check if NPM is installed
+      command: which npm
+      register: npm_check
       ignore_errors: yes
-    - name: Install SDKman
-      ansible.builtin.shell: curl -s "https://get.sdkman.io" | bash
-      when: sdkman_exists is failed
-    - name: Install SDKMan-managed tools
-      ansible.builtin.shell: |
-        sdk install java
-        sdk install scala
+      tags: lang-web-dev
+    - name: Exit web development support installation
+      fail:
+        msg: Please install Node & NPM
+      when: npm_check != 0
+      tags: lang-web-dev
+    - name: Add web development support -> LSs (HTML + CSS + JS + TS)
+      homebrew:
+        name:
+          - typescript-language-server
+          - vscode-langservers-extracted
+      tags: lang-web-dev
+    - name: Add web development support -> LSs (Tailwind LS + Emmet)
+      npm:
+        global: true
+        name:
+          - tailwindcss/language-server
+          - olrtg/emmet-language-server
+      tags: lang-web-dev
+    ## Simple completion language server
+    - name: Check if Rustup is installed
+      command: which rustup
+      register: rustup_check
+      ignore_errors: yes
+      tags: lang-simple-completion
+    - name: Exit Simple Completion LS installation
+      fail:
+        msg: Please install Rustup
+      when: rustup_check != 0
+      tags: lang-simple-completion
+    - name: Install Simple Completion LS
+      shell: |
+        cargo install --git https://github.com/estin/simple-completion-language-server.git
+      tags: lang-simple-completion
+    ## Vimscript
+    - name: Check if NPM is installed
+      command: which npm
+      register: npm_check
+      ignore_errors: yes
+      tags: lang-vimscript
+    - name: Exit Vimscript support installation
+      fail:
+        msg: Please install Rustup
+      when: npm_check != 0
+      tags: lang-vimscript
+    - name: Add Vimscript support -> LS
+      npm:
+        global: true
+        name:
+          - vim-language-server
+      tags: lang-vimscript
