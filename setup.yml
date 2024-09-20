@@ -2,6 +2,86 @@
 - name: Setup my computing environment
   hosts: localhost
   tasks:
+    ### Setup git, repositories, directories, and symlinks.
+    - name: Check public scripts directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/public-scripts
+      register: public_scripts
+      tags: configs-and-environment
+    - name: Clone my public scripts
+      git:
+        repo: git@github.com:pavlo-skobnikov/public-scripts.git
+        dest: ~/public-scripts
+        accept_hostkey: true
+      when: not public_scripts.stat.exists
+      tags: configs-and-environment
+    - name: Allow execution of public scripts
+      ansible.builtin.file:
+        path: ~/public-scripts
+        state: directory
+        recurse: true
+        mode: a+x
+      tags: configs-and-environment
+    - name: Check private scripts directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/private-scripts
+      register: private_scripts
+      tags: configs-and-environment
+    - name: Clone my private scripts
+      git:
+        repo: git@github.com:pavlo-skobnikov/private-scripts.git
+        dest: ~/private-scripts
+        accept_hostkey: true
+      when: not private_scripts.stat.exists
+      tags: configs-and-environment
+    - name: Allow execution of private scripts
+      ansible.builtin.file:
+        path: ~/private-scripts
+        state: directory
+        recurse: true
+        mode: a+x
+      tags: configs-and-environment
+    - name: Check secrets directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/secrets
+      register: secrets
+      tags: configs-and-environment
+    - name: Clone my secrets
+      git:
+        repo: git@github.com:pavlo-skobnikov/secrets.git
+        dest: ~/secrets
+        accept_hostkey: true
+      when: not secrets.stat.exists
+      tags: configs-and-environment
+    - name: Check dotfiles directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/dotfiles
+      register: dotfiles
+      tags: configs-and-environment
+    - name: Clone dotfiles
+      git:
+        repo: git@github.com:pavlo-skobnikov/dotfiles.git
+        dest: ~/dotfiles
+        accept_hostkey: true
+      when: not dotfiles.stat.exists
+      tags: configs-and-environment
+    - name: Stow dotfiles
+      ansible.builtin.shell: ~/public-scripts/stow-dotfiles.sh
+      tags: configs-and-environment
+    - name: Check projects directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/dev/projects
+      register: projects
+      tags: configs-and-environment
+    - name: Create projects directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - ~/dev/projects/personal
+        - ~/dev/projects/work
+      when: not projects.stat.exists
+      tags: configs-and-environment
     ### Must-have tools
     - name: Install CLI tools
       homebrew:
@@ -223,6 +303,12 @@
         cargo install taplo-cli --locked
         cargo install --git https://github.com/estin/simple-completion-language-server.git
       tags: lang-rust
+    ## Swift
+    - name: Add Swift support -> Formatter
+      homebrew:
+        name:
+          - swift-format
+      tags: lang-swift
     ## Web development
     - name: Check if NPM is installed
       command: which npm
