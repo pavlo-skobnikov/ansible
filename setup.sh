@@ -15,4 +15,4 @@ brew analytics off
 brew install ansible
 
 # Lastly, pull down the Ansible playbook and run it.
-ansible-pull -U https://github.com/pavlo-skobnikov/ansible.git
+ansible-pull -U https://github.com/pavlo-skobnikov/ansible.git --tags "configs-and-environment,tools-cli,tools-ui"
