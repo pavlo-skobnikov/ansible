@@ -284,6 +284,13 @@
         go install github.com/nametake/golangci-lint-langserver@latest
         go install github.com/a-h/templ/cmd/templ@latest
       tags: lang-go
+    ## Gleam
+    - name: Add Gleam support
+      homebrew:
+        name:
+          - gleam
+          - rebar3
+      tags: lang-gleam
     ## Rust
     - name: Check if Rustup is installed
       command: which rustup
