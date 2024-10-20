@@ -2,88 +2,8 @@
 - name: Setup my computing environment
   hosts: localhost
   tasks:
-    ### Setup git, repositories, directories, and symlinks.
-    - name: Check public scripts directory doesn't exist
-      ansible.builtin.stat:
-        path: ~/public-scripts
-      register: public_scripts
-      tags: configs-and-environment
-    - name: Clone my public scripts
-      git:
-        repo: git@github.com:pavlo-skobnikov/public-scripts.git
-        dest: ~/public-scripts
-        accept_hostkey: true
-      when: not public_scripts.stat.exists
-      tags: configs-and-environment
-    - name: Allow execution of public scripts
-      ansible.builtin.file:
-        path: ~/public-scripts
-        state: directory
-        recurse: true
-        mode: a+x
-      tags: configs-and-environment
-    - name: Check private scripts directory doesn't exist
-      ansible.builtin.stat:
-        path: ~/private-scripts
-      register: private_scripts
-      tags: configs-and-environment
-    - name: Clone my private scripts
-      git:
-        repo: git@github.com:pavlo-skobnikov/private-scripts.git
-        dest: ~/private-scripts
-        accept_hostkey: true
-      when: not private_scripts.stat.exists
-      tags: configs-and-environment
-    - name: Allow execution of private scripts
-      ansible.builtin.file:
-        path: ~/private-scripts
-        state: directory
-        recurse: true
-        mode: a+x
-      tags: configs-and-environment
-    - name: Check secrets directory doesn't exist
-      ansible.builtin.stat:
-        path: ~/secrets
-      register: secrets
-      tags: configs-and-environment
-    - name: Clone my secrets
-      git:
-        repo: git@github.com:pavlo-skobnikov/secrets.git
-        dest: ~/secrets
-        accept_hostkey: true
-      when: not secrets.stat.exists
-      tags: configs-and-environment
-    - name: Check dotfiles directory doesn't exist
-      ansible.builtin.stat:
-        path: ~/dotfiles
-      register: dotfiles
-      tags: configs-and-environment
-    - name: Clone dotfiles
-      git:
-        repo: git@github.com:pavlo-skobnikov/dotfiles.git
-        dest: ~/dotfiles
-        accept_hostkey: true
-      when: not dotfiles.stat.exists
-      tags: configs-and-environment
-    - name: Stow dotfiles
-      ansible.builtin.shell: ~/public-scripts/stow-dotfiles.sh
-      tags: configs-and-environment
-    - name: Check projects directory doesn't exist
-      ansible.builtin.stat:
-        path: ~/dev/projects
-      register: projects
-      tags: configs-and-environment
-    - name: Create projects directories
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-      loop:
-        - ~/dev/projects/personal
-        - ~/dev/projects/work
-      when: not projects.stat.exists
-      tags: configs-and-environment
-    ### Must-have tools
-    - name: Install CLI tools
+    ### Install essential tools
+    - name: Install essential CLI tools
       homebrew:
         name:
           - zsh # Ze shell to use
@@ -99,276 +19,83 @@
           - lf # Terminal file manager
           - lazygit # Simple terminal UI for `git` commands
           - lazydocker # Simple terminal UI for `docker` commands
+          - stow # Essential tools for symlinking configurations
           - helix # Post-modern modal text editor
-      tags: tools-cli
-    - name: Install UI tools
+    - name: Install essential UI tools
       homebrew_cask:
         name:
           - docker
-          - ngrok
           - alacritty
-          - intellij-idea
-          - postman
-          - raycast
           - shortcat
           - karabiner-elements
           - arc
           - telegram
-          - slack
-          - zoom
-      tags: tools-ui
-    ### Package managers
-    ## Cargo
-    - name: Check if Cargo is installed
-      command: which cargo
-      register: cargo_check
-      ignore_errors: yes
-      tags: package-cargo
-    - name: Exit Cargo installation
-      fail:
-        msg: Cargo is already installed
-      when: cargo_check == 0
-      tags: package-cargo
-    - name: Install Cargo
-      shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-      when: cargo_check != 0
-      tags: package-cargo
-    ## SDKMan
-    - name: Check if SDKMan is installed
-      command: which sdk
-      register: sdkman_check
-      ignore_errors: yes
-      tags: package-sdkman
-    - name: Exit SDKMan installation
-      fail:
-        msg: SDKMan is already installed
-      when: sdkman_check == 0
-      tags: package-sdkman
-    - name: Install SDKman
-      shell: curl -s "https://get.sdkman.io" | bash
-      when: sdkman_check != 0
-      tags: package-sdkman
-    ## Node & NPM
-    - name: Check if Node & NPM are installed
-      command: which npm
-      register: npm_check
-      ignore_errors: yes
-      tags: package-node-npm
-    - name: Exit Node & NPM installation
-      fail:
-        msg: Node & NPM are already installed
-      when: npm_check == 0
-      tags: package-node-npm
-    - name: Install Node & NPM
-      homebrew:
-        name:
-          - node
-      when: npm_check != 0
-      tags: package-node-npm
-    ### Languages & tools
-    ## Markdown
-    - name: Add Markdown support -> LS
-      homebrew:
-        name:
-          - marksman
-      tags: lang-markdown
-    ## Bash, Zsh, etc
-    - name: Add Bash and Zsh support -> LS, linter, and formatter
-      homebrew:
-        name:
-          - bash-language-server
-          - shellcheck
-          - shfmt
-      tags: lang-shell
-    ## YAML
-    - name: Add YAML support -> LS & linter
-      homebrew:
-        name:
-          - yaml-language-server
-          - yamllint
-      tags: lang-yaml
-    ## Ansible
-    - name: Add Ansible support -> LS & linter
-      homebrew:
-        name:
-          - ansible-language-server
-          - ansible-lint
-      tags: lang-ansible
-    ## TOML
-    - name: Check if Rustup is installed
-      command: which rustup
-      register: rustup_check
-      ignore_errors: yes
-      tags: lang-toml
-    - name: Exit TOML support installation
-      fail:
-        msg: Please install Rustup
-      when: rustup_check != 0
-      tags: lang-toml
-    - name: Add TOML support -> LS
-      shell: |
-        cargo install taplo-cli --locked
-      tags: lang-toml
-    ## Protobuf
-    - name: Check if Golang is installed
-      command: which go
-      register: go_check
-      ignore_errors: yes
-      tags: lang-protobuf
-    - name: Exit Protobuf support installation
-      fail:
-        msg: Please install Golang
-      when: go_check != 0
-      tags: lang-protobuf
-    - name: Add Protobuf support -> LS
-      shell: |
-        go install github.com/lasorda/protobuf-language-server@latest
-      tags: lang-protobuf
-    ## Java
-    - name: Check if SDKMan is installed
-      command: which sdk
-      register: sdkman_check
-      ignore_errors: yes
-      tags: lang-java
-    - name: Exit Java installation
-      fail:
-        msg: Please install SDKMan
-      when: sdkman_check != 0
-      tags: lang-java
-    - name: Install Java via SDKMan
-      shell: |
-        sdk install java
-      tags: lang-java
-    - name: Add Java support -> LS & formatter
-      homebrew:
-        name:
-          - jdtls
-          - google-java-format
-      tags: lang-java
-    ## Scala
-    - name: Check if SDKMan is installed
-      command: which sdk
-      register: sdkman_check
-      ignore_errors: yes
-      tags: lang-scala
-    - name: Exit Scala installation
-      fail:
-        msg: Please install SDKMan
-      when: sdkman_check != 0
-      tags: lang-scala
-    - name: Install Scala via SDKMan
-      shell: |
-        sdk install scala
-      tags: lang-scala
-    - name: Add Scala support -> Coursier
-      homebrew:
-        name:
-          - coursier
-      tags: lang-scala
-    - name: Add Scala support -> Metals & Scalafmt
-      shell: |
-        cs install metals
-        cs install scalafmt
-      tags: lang-scala
-    ## Golang
-    - name: Install Golang
-      homebrew:
-        name:
-          - go
-      tags: lang-go
-    - name: Add Golang support -> LS, linter, debugger, formatter, & Templ
-      shell: |
-        go install golang.org/x/tools/gopls@latest
-        go install github.com/go-delve/delve/cmd/dlv@latest
-        go install mvdan.cc/gofumpt@latest
-        go install github.com/nametake/golangci-lint-langserver@latest
-        go install github.com/a-h/templ/cmd/templ@latest
-      tags: lang-go
-    ## Gleam
-    - name: Add Gleam support
-      homebrew:
-        name:
-          - gleam
-          - rebar3
-      tags: lang-gleam
-    ## Rust
-    - name: Check if Rustup is installed
-      command: which rustup
-      register: rustup_check
-      ignore_errors: yes
-      tags: lang-rust
-    - name: Exit Rust installation
-      fail:
-        msg: Please install Rustup
-      when: rustup_check != 0
-      tags: lang-rust
-    - name: Add Rust support -> LS, linter, & formatter
-      shell: |
-        rustup component add rust-analyzer
-        rustup component add clippy
-        rustup component add rustfmt
-        cargo install taplo-cli --locked
-        cargo install --git https://github.com/estin/simple-completion-language-server.git
-      tags: lang-rust
-    ## Swift
-    - name: Add Swift support -> Formatter
-      homebrew:
-        name:
-          - swift-format
-      tags: lang-swift
-    ## Web development
-    - name: Check if NPM is installed
-      command: which npm
-      register: npm_check
-      ignore_errors: yes
-      tags: lang-web-dev
-    - name: Exit web development support installation
-      fail:
-        msg: Please install Node & NPM
-      when: npm_check != 0
-      tags: lang-web-dev
-    - name: Add web development support -> LSs (HTML + CSS + JS + TS)
-      homebrew:
-        name:
-          - typescript-language-server
-          - vscode-langservers-extracted
-      tags: lang-web-dev
-    - name: Add web development support -> LSs (Tailwind LS + Emmet)
-      npm:
-        global: true
-        name:
-          - tailwindcss/language-server
-          - olrtg/emmet-language-server
-      tags: lang-web-dev
-    ## Simple completion language server
-    - name: Check if Rustup is installed
-      command: which rustup
-      register: rustup_check
-      ignore_errors: yes
-      tags: lang-simple-completion
-    - name: Exit Simple Completion LS installation
-      fail:
-        msg: Please install Rustup
-      when: rustup_check != 0
-      tags: lang-simple-completion
-    - name: Install Simple Completion LS
-      shell: |
-        cargo install --git https://github.com/estin/simple-completion-language-server.git
-      tags: lang-simple-completion
-    ## Vimscript
-    - name: Check if NPM is installed
-      command: which npm
-      register: npm_check
-      ignore_errors: yes
-      tags: lang-vimscript
-    - name: Exit Vimscript support installation
-      fail:
-        msg: Please install Rustup
-      when: npm_check != 0
-      tags: lang-vimscript
-    - name: Add Vimscript support -> LS
-      npm:
-        global: true
-        name:
-          - vim-language-server
-      tags: lang-vimscript
+    ### Setup git, repositories, directories, and symlinks.
+    - name: Check public scripts directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/public-scripts
+      register: public_scripts
+    - name: Clone my public scripts
+      git:
+        repo: git@github.com:pavlo-skobnikov/public-scripts.git
+        dest: ~/public-scripts
+        accept_hostkey: true
+      when: not public_scripts.stat.exists
+    - name: Allow execution of public scripts
+      ansible.builtin.file:
+        path: ~/public-scripts
+        state: directory
+        recurse: true
+        mode: a+x
+    - name: Check private scripts directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/private-scripts
+      register: private_scripts
+    - name: Clone my private scripts
+      git:
+        repo: git@github.com:pavlo-skobnikov/private-scripts.git
+        dest: ~/private-scripts
+        accept_hostkey: true
+      when: not private_scripts.stat.exists
+    - name: Allow execution of private scripts
+      ansible.builtin.file:
+        path: ~/private-scripts
+        state: directory
+        recurse: true
+        mode: a+x
+    - name: Check secrets directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/secrets
+      register: secrets
+    - name: Clone my secrets
+      git:
+        repo: git@github.com:pavlo-skobnikov/secrets.git
+        dest: ~/secrets
+        accept_hostkey: true
+      when: not secrets.stat.exists
+    - name: Check dotfiles directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/dotfiles
+      register: dotfiles
+    - name: Clone dotfiles
+      git:
+        repo: git@github.com:pavlo-skobnikov/dotfiles.git
+        dest: ~/dotfiles
+        accept_hostkey: true
+      when: not dotfiles.stat.exists
+    - name: Remove temporary .zprofile and stow dotfiles
+      ansible.builtin.shell: |
+        rm ~/.zprofile
+        ~/public-scripts/stow-dotfiles.sh
+    - name: Check projects directory doesn't exist
+      ansible.builtin.stat:
+        path: ~/dev/projects
+      register: projects
+    - name: Create projects directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - ~/dev/projects/personal
+        - ~/dev/projects/work
+      when: not projects.stat.exists

@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# NOTE: Before running this script, the Github SSH key must be set up for the
+# given device.
+
 # This script is used to setup any MacOS machine as my development environment
 #   w/ the help from Ansible.
 #
@@ -9,10 +12,23 @@
 # Firstly, let's install Homebrew to manage our packages.
 echo "Installing Brew..."
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew analytics off
 
-# Then, install ansible to actually run our playbooks.
+# Add Homebrew to the current shell's path.
+echo >> ~/.zprofile
+echo "eval \"$(/opt/homebrew/bin/brew shellenv)\"" >> ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Install ansible to actually run our playbooks.
 brew install ansible
 
-# Lastly, pull down the Ansible playbook and run it.
-ansible-pull -U https://github.com/pavlo-skobnikov/ansible.git --tags "configs-and-environment,tools-cli,tools-ui"
+# Clone my ansible repository.
+git clone git@github.com:pavlo-skobnikov/ansible.git
+
+# Add the directory with the playbooks to the stack.
+pushd ~/ansible || exit
+
+# Run the setup playbook.
+ansible-playbook ./setup.yml
+
+# Clean up and finish the setup.
+popd || exit
