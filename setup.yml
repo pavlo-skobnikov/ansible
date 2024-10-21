@@ -7,6 +7,7 @@
       homebrew:
         name:
           - zsh # Ze shell to use
+          - powerlevel10k # Better command line prompt
           - bat # Prettier `cat`
           - eza # Better `ls`
           - gnu-sed # GNU implementation of `sed`
@@ -21,16 +22,20 @@
           - lazydocker # Simple terminal UI for `docker` commands
           - stow # Essential tools for symlinking configurations
           - helix # Post-modern modal text editor
+          - tmux # An unreplaceable terminal emulator
     - name: Install essential UI tools
       homebrew_cask:
         name:
+          - font-hack-nerd-font
           - docker
           - alacritty
           - shortcat
           - karabiner-elements
           - arc
           - telegram
-    ### Setup git, repositories, directories, and symlinks.
+    ### Setup git, repositories, directories, and symlinks
+    - name: Check public scripts directory doesn't exist
+      ansible.builtin.shell: defaults write -g ApplePressAndHoldEnabled -bool false
     - name: Check public scripts directory doesn't exist
       ansible.builtin.stat:
         path: ~/public-scripts
