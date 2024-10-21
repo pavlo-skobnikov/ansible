@@ -35,9 +35,9 @@
           - telegram
     ### Setup git, repositories, directories, and symlinks
     - name: Check public scripts directory doesn't exist
-      ansible.builtin.shell: defaults write -g ApplePressAndHoldEnabled -bool false
+      shell: defaults write -g ApplePressAndHoldEnabled -bool false
     - name: Check public scripts directory doesn't exist
-      ansible.builtin.stat:
+      stat:
         path: ~/public-scripts
       register: public_scripts
     - name: Clone my public scripts
@@ -47,13 +47,13 @@
         accept_hostkey: true
       when: not public_scripts.stat.exists
     - name: Allow execution of public scripts
-      ansible.builtin.file:
+      file:
         path: ~/public-scripts
         state: directory
         recurse: true
         mode: a+x
     - name: Check private scripts directory doesn't exist
-      ansible.builtin.stat:
+      stat:
         path: ~/private-scripts
       register: private_scripts
     - name: Clone my private scripts
@@ -63,13 +63,13 @@
         accept_hostkey: true
       when: not private_scripts.stat.exists
     - name: Allow execution of private scripts
-      ansible.builtin.file:
+      file:
         path: ~/private-scripts
         state: directory
         recurse: true
         mode: a+x
     - name: Check secrets directory doesn't exist
-      ansible.builtin.stat:
+      stat:
         path: ~/secrets
       register: secrets
     - name: Clone my secrets
@@ -79,7 +79,7 @@
         accept_hostkey: true
       when: not secrets.stat.exists
     - name: Check dotfiles directory doesn't exist
-      ansible.builtin.stat:
+      stat:
         path: ~/dotfiles
       register: dotfiles
     - name: Clone dotfiles
@@ -89,15 +89,15 @@
         accept_hostkey: true
       when: not dotfiles.stat.exists
     - name: Remove temporary .zprofile and stow dotfiles
-      ansible.builtin.shell: |
+      shell: |
         rm ~/.zprofile
         ~/public-scripts/stow-dotfiles.sh
     - name: Check projects directory doesn't exist
-      ansible.builtin.stat:
+      stat:
         path: ~/dev/projects
       register: projects
     - name: Create projects directories
-      ansible.builtin.file:
+      file:
         path: "{{ item }}"
         state: directory
       loop:
