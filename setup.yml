@@ -30,7 +30,9 @@
           - docker
           - alacritty
           - shortcat
+          - raycast
           - karabiner-elements
+          - 1password
           - arc
           - telegram
     ### Setup git, repositories, directories, and symlinks
