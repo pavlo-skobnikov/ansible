@@ -33,6 +33,7 @@
           - raycast
           - karabiner-elements
           - 1password
+          - 1password-cli
           - arc
           - telegram
     ### Setup git, repositories, directories, and symlinks
