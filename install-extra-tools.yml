@@ -206,8 +206,7 @@
         rustup component add rust-analyzer
         rustup component add clippy
         rustup component add rustfmt
-        cargo install taplo-cli --locked
-        cargo install --git https://github.com/estin/simple-completion-language-server.git
+        cargo install cargo-update
       tags: lang-rust
     ## Swift
     - name: Add Swift support -> Formatter
