@@ -1,0 +1,37 @@
+---
+- name: Update all installed tools
+  hosts: localhost
+  tasks:
+    - name: Update and upgrade Homebrew
+      homebrew:
+        update_homebrew: true
+        upgrade_all: true
+    - name: Try to update Rust and Cargo-managed applications
+      shell: |
+        rustup update
+        cargo install-update -a
+      ignore_errors: yes
+    - name: Try to update Golang-managed applications
+      shell: |
+        go install golang.org/x/tools/gopls@latest
+        go install github.com/go-delve/delve/cmd/dlv@latest
+        go install mvdan.cc/gofumpt@latest
+        go install github.com/nametake/golangci-lint-langserver@latest
+        go install github.com/a-h/templ/cmd/templ@latest
+      ignore_errors: yes
+    - name: Try to update SDKMan
+      shell: |
+        sdk update
+      ignore_errors: yes
+    - name: Try to update Coursier-managed applications
+      shell: |
+        coursier update
+      ignore_errors: yes
+    - name: Try to update Clojure-managed applications
+      shell: |
+        clj -Ttools install-latest
+      ignore_errors: yes
+    - name: Try to update NPM-managed applications
+      shell: |
+        npm update -g
+      ignore_errors: yes
