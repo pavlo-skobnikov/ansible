@@ -29,6 +29,7 @@
           - font-hack-nerd-font
           - docker
           - alacritty
+          - visual-studio-code
           - shortcat
           - raycast
           - karabiner-elements
