@@ -29,13 +29,10 @@
           - font-hack-nerd-font
           - docker
           - alacritty
-          - visual-studio-code
           - shortcat
           - raycast
           - karabiner-elements
-          - 1password
-          - 1password-cli
-          - arc
+          - google-chrome
           - telegram
     ### Setup git, repositories, directories, and symlinks
     - name: Check public scripts directory doesn't exist

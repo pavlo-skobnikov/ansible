@@ -6,7 +6,6 @@
     - name: Install extra work UI tools
       homebrew_cask:
         name:
-          - slack
           - microsoft-teams
           - zoom
       tags: extra-work
