@@ -144,31 +144,6 @@
           - jdtls
           - google-java-format
       tags: lang-java
-    ## Scala
-    - name: Check if SDKMan is installed
-      command: which sdk
-      register: sdkman_check
-      ignore_errors: yes
-      tags: lang-scala
-    - name: Exit Scala installation
-      fail:
-        msg: Please install SDKMan
-      when: sdkman_check != 0
-      tags: lang-scala
-    - name: Install Scala via SDKMan
-      shell: |
-        sdk install scala
-      tags: lang-scala
-    - name: Add Scala support -> Coursier
-      homebrew:
-        name:
-          - coursier
-      tags: lang-scala
-    - name: Add Scala support -> Metals & Scalafmt
-      shell: |
-        cs install metals
-        cs install scalafmt
-      tags: lang-scala
     ## Golang
     - name: Install Golang
       homebrew:
