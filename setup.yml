@@ -21,6 +21,7 @@
           - lazygit # Simple terminal UI for `git` commands
           - lazydocker # Simple terminal UI for `docker` commands
           - stow # Essential tools for symlinking configurations
+          - hx # A great modern terminal-based modal editor
           - tmux # An unreplaceable terminal emulator
     - name: Install essential UI tools
       homebrew_cask:
