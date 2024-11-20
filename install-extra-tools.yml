@@ -25,11 +25,11 @@
     - name: Exit Cargo installation
       fail:
         msg: Cargo is already installed
-      when: cargo_check == 0
+      when: cargo_check.rc == 0
       tags: package-cargo
     - name: Install Cargo
-      shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-      when: cargo_check != 0
+      shell: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      when: cargo_check.rc != 0
       tags: package-cargo
     ## SDKMan
     - name: Check if SDKMan is installed
@@ -40,11 +40,11 @@
     - name: Exit SDKMan installation
       fail:
         msg: SDKMan is already installed
-      when: sdkman_check == 0
+      when: sdkman_check.rc == 0
       tags: package-sdkman
     - name: Install SDKman
       shell: curl -s "https://get.sdkman.io" | bash
-      when: sdkman_check != 0
+      when: sdkman_check.rc != 0
       tags: package-sdkman
     ## Node & NPM
     - name: Check if Node & NPM are installed
@@ -55,13 +55,13 @@
     - name: Exit Node & NPM installation
       fail:
         msg: Node & NPM are already installed
-      when: npm_check == 0
+      when: npm_check.rc == 0
       tags: package-node-npm
     - name: Install Node & NPM
       homebrew:
         name:
           - node
-      when: npm_check != 0
+      when: npm_check.rc != 0
       tags: package-node-npm
     ### Languages & tools
     ## Markdown
@@ -101,7 +101,7 @@
     - name: Exit TOML support installation
       fail:
         msg: Please install Rustup
-      when: rustup_check != 0
+      when: rustup_check.rc != 0
       tags: lang-toml
     - name: Add TOML support -> LS
       shell: |
@@ -116,7 +116,7 @@
     - name: Exit Protobuf support installation
       fail:
         msg: Please install Golang
-      when: go_check != 0
+      when: go_check.rc != 0
       tags: lang-protobuf
     - name: Add Protobuf support -> LS
       shell: |
@@ -131,7 +131,7 @@
     - name: Exit Java installation
       fail:
         msg: Please install SDKMan
-      when: sdkman_check != 0
+      when: sdkman_check.rc != 0
       tags: lang-java
     - name: Install Java via SDKMan
       shell: |
@@ -173,7 +173,7 @@
     - name: Exit Rust installation
       fail:
         msg: Please install Rustup
-      when: rustup_check != 0
+      when: rustup_check.rc != 0
       tags: lang-rust
     - name: Add Rust support -> LS, linter, & formatter
       shell: |
@@ -197,7 +197,7 @@
     - name: Exit web development support installation
       fail:
         msg: Please install Node & NPM
-      when: npm_check != 0
+      when: npm_check.rc != 0
       tags: lang-web-dev
     - name: Add web development support -> LSs (HTML + CSS + JS + TS)
       homebrew:
@@ -211,6 +211,7 @@
         name:
           - tailwindcss/language-server
           - olrtg/emmet-language-server
+      ignore_errors: yes
       tags: lang-web-dev
     ## Simple completion language server
     - name: Check if Rustup is installed
@@ -221,7 +222,7 @@
     - name: Exit Simple Completion LS installation
       fail:
         msg: Please install Rustup
-      when: rustup_check != 0
+      when: rustup_check.rc != 0
       tags: lang-simple-completion
     - name: Install Simple Completion LS
       shell: |
@@ -236,7 +237,7 @@
     - name: Exit Vimscript support installation
       fail:
         msg: Please install Rustup
-      when: npm_check != 0
+      when: npm_check.rc != 0
       tags: lang-vimscript
     - name: Add Vimscript support -> LS
       npm:
