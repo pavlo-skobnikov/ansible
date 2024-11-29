@@ -31,12 +31,15 @@
           - alacritty
           - shortcat
           - raycast
+          - nikitabobko/tap/aerospace
           - karabiner-elements
           - google-chrome
           - telegram
     ### Setup git, repositories, directories, and symlinks
     - name: Check public scripts directory doesn't exist
-      shell: defaults write -g ApplePressAndHoldEnabled -bool false
+      shell: |
+        defaults write -g ApplePressAndHoldEnabled -bool false
+        defaults write -g NSWindowShouldDragOnGesture -bool true
     - name: Check public scripts directory doesn't exist
       stat:
         path: ~/public-scripts
