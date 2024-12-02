@@ -3,7 +3,7 @@
   hosts: localhost
   tasks:
     ### Install essential tools
-    - name: Install essential CLI tools
+    - name: Install essential homebrew CLI tools
       homebrew:
         name:
           - zsh # Ze shell to use
@@ -23,6 +23,10 @@
           - stow # Essential tools for symlinking configurations
           - hx # A great modern terminal-based modal editor
           - tmux # An unreplaceable terminal emulator
+    - name: Install essential pip CLI tools
+      pip:
+        name:
+          - shell-gpt
     - name: Install essential UI tools
       homebrew_cask:
         name:
